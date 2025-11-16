@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide win message if visible
         winMessage.style.display = 'none';
         
-        // Reset board state
+        // Reset board state for a new turn
         resetBoard();
 
         // Set responsive layout based on screen size
@@ -61,9 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function setResponsiveLayout() {
         const width = window.innerWidth;
         
+        // Save the old totalPairs to check if the layout actually changed
+        const oldTotalPairs = totalPairs;
+
         if (width <= 480) {
-            // Mobile layout - 2x3 grid (6 cards)
-            totalPairs = 6;
+            // Mobile layout - 2x3 grid (3 pairs, 6 cards)
+            totalPairs = 3; 
             gameBoard.className = 'game-board mobile-layout';
         } else if (width <= 768) {
             // Tablet layout - 4x4 grid (8 pairs)
@@ -74,16 +77,25 @@ document.addEventListener('DOMContentLoaded', () => {
             totalPairs = 12;
             gameBoard.className = 'game-board desktop-layout';
         }
+
+        // If the game hasn't started yet and the layout size changed, re-initialize to load new cards.
+        // This is important because the grid size changes the card count (totalPairs).
+        if (!gameStarted && oldTotalPairs && oldTotalPairs !== totalPairs) {
+            createCards();
+        }
     }
 
     /**
      * Create and shuffle cards
      */
     function createCards() {
+        // Remove existing cards first (if setResponsiveLayout called this)
+        gameBoard.innerHTML = ''; 
         let cards = [];
         
         // Create pairs of cards
         for (let i = 0; i < totalPairs; i++) {
+            // Use only the first 'totalPairs' symbols
             cards.push(cardSymbols[i]);
             cards.push(cardSymbols[i]);
         }
@@ -192,9 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Remove event listeners from matched cards
         firstCard.removeEventListener('click', flipCard);
-        secondCard.removeEventListener('keypress', handleCardKeyPress);
-        secondCard.removeEventListener('click', flipCard);
         firstCard.removeEventListener('keypress', handleCardKeyPress);
+        secondCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('keypress', handleCardKeyPress);
         
         // Remove tabindex from matched cards
         firstCard.removeAttribute('tabindex');
@@ -227,8 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * Reset board state after each turn
      */
     function resetBoard() {
-        [hasFlippedCard, lockBoard] = [false, false];
-        [firstCard, secondCard] = [null, null];
+        // Reset state variables for the next turn
+        lockBoard = false;
+        firstCard = null;
+        secondCard = null;
     }
 
     /**
@@ -271,21 +285,20 @@ document.addEventListener('DOMContentLoaded', () => {
      * Handle window resize for responsive layout
      */
     function handleResize() {
-        // Only reinitialize if game hasn't started or is finished
-        if (!gameStarted || matchedPairs === totalPairs) {
-            initGame();
-        } else {
-            // Just update the layout without resetting game state
+        // If the game is running, only update the CSS classes for visual responsiveness.
+        // Changing 'totalPairs' mid-game would break the logic.
+        if (gameStarted && matchedPairs < totalPairs) {
             setResponsiveLayout();
+        } else {
+            // If the game hasn't started or is finished, reinitialize to load new card counts/layout.
+            initGame();
         }
     }
 
     // Event Listeners
 
     // Restart game button
-    restartButton.addEventListener('click', () => {
-        initGame();
-    });
+    restartButton.addEventListener('click', initGame);
 
     // Play again button
     playAgainButton.addEventListener('click', () => {
@@ -326,8 +339,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Global variables (needed for resetBoard function)
-let hasFlippedCard = false;
-let lockBoard = false;
-let firstCard = null;
-let secondCard = null;
+// REMOVED: Global variable declarations that caused the scope issue.
