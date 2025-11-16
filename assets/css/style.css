@@ -91,11 +91,11 @@ h1 {
 
 .game-board {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 10px;
-  width: 100%;
+  grid-gap: 12px;
+  margin: 0 auto 30px;
+  justify-content: center;
+  max-width: 100%;
 }
-
 
 /* Layouts */
 .desktop-layout { grid-template-columns: repeat(6, 1fr); }

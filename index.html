@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,179 +10,20 @@
   <title>Memory Game</title>
 </head>
 <body>
-  <body>
   <div class="container">
-    <!-- HEADER -->
     <header>
-      <h1>Memory Card Game</h1>
-      <p class="instructions">Match all the pairs to win!</p>
+      <h1>Memory Game</h1>
+      <p class="instructions">Match all the pairs! Click on a card to flip it and find its matching pair.</p>
     </header>
 
-    <!-- GAME INFO -->
     <div class="game-info">
-      <div class="moves">Moves: <span id="moves-count">0</span></div>
-      <div class="timer">Time: <span id="time">0</span>s</div>
-      <button id="restart" class="restart-btn">Restart</button>
+      <div class="moves"><i class="fas fa-sync-alt"></i> Moves: <span id="moves-count">0</span></div>
+      <div class="timer"><i class="fas fa-clock"></i> Time: <span id="time">0</span>s</div>
+      <button class="restart-btn" id="restart"><i class="fas fa-redo"></i> Restart Game</button>
     </div>
 
-    <!-- GAME BOARD -->
-    <div id="game-board" class="game-board desktop-layout">
-      <!-- Pair 1 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍎</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍎</div>
-        </div>
-      </div>
-      <!-- Pair 2 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍌</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍌</div>
-        </div>
-      </div>
-      <!-- Pair 3 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍇</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍇</div>
-        </div>
-      </div>
-      <!-- Pair 4 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍊</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍊</div>
-        </div>
-      </div>
-      <!-- Pair 5 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍓</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍓</div>
-        </div>
-      </div>
-      <!-- Pair 6 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍉</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍉</div>
-        </div>
-      </div>
-      <!-- Pair 7 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍒</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍒</div>
-        </div>
-      </div>
-      <!-- Pair 8 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍐</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍐</div>
-        </div>
-      </div>
-      <!-- Pair 9 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🥝</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🥝</div>
-        </div>
-      </div>
-      <!-- Pair 10 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍑</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍑</div>
-        </div>
-      </div>
-      <!-- Pair 11 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🥥</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🥥</div>
-        </div>
-      </div>
-      <!-- Pair 12 -->
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍋</div>
-        </div>
-      </div>
-      <div class="card" tabindex="0">
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">🍋</div>
-        </div>
-      </div>
+    <div class="game-board desktop-layout" id="game-board">
+      <!-- Cards will be generated by JavaScript -->
     </div>
 
     <footer>
