@@ -9,60 +9,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- FontAwesome Icons -->
+    <script src="https://kit.fontawesome.com/a2e860f0d3.js" crossorigin="anonymous"></script>
 
-
-    <!-- Your CSS file -->
+    <!-- CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <!-- HEADER -->
-        <header>
-            <h1>Memory Card Match</h1>
-            <p class="instructions">Flip the cards and match all pairs in as few moves as possible.</p>
-        </header>
+    <!-- HEADER -->
+    <header>
+        <h1>Memory Card Match</h1>
+        <p class="instructions">Flip the cards and match all pairs in as few moves as possible.</p>
+    </header>
 
-        <!-- GAME INFO AREA -->
-        <div class="game-info">
-            <div class="moves">
-                <i class="fas fa-sync-alt"></i>
-                Moves: <span id="moves-count">0</span>
-            </div>
-
-            <div class="timer">
-                <i class="far fa-clock"></i>
-                Time: <span id="time">00:00</span>
-            </div>
-
-            <button id="restart" class="restart-btn">
-                <i class="fas fa-redo"></i>
-                Restart
-            </button>
-        </div>
-
-        <!-- GAME BOARD -->
-        <div id="game-board" class="game-board mobile-layout"></div>
-
+    <!-- GAME INFO -->
+    <div class="game-info">
+        <div class="moves"><i class="fas fa-sync-alt"></i> Moves: <span id="moves-count">0</span></div>
+        <div class="timer"><i class="far fa-clock"></i> Time: <span id="time">0</span></div>
+        <button id="restart" class="restart-btn"><i class="fas fa-redo"></i> Restart</button>
     </div>
 
-    <!-- WIN MESSAGE (Full-Screen Overlay) -->
-    <div id="win-message" class="win-message">
-        <div class="win-content">
-            <h2>🎉 You Win! 🎉</h2>
-            <p>You matched all the cards!</p>
-
-            <p>Moves: <span id="final-moves">0</span></p>
-            <p>Time: <span id="final-time">00:00</span></p>
-
-            <button id="play-again" class="play-again-btn">
-                <i class="fas fa-play"></i> Play Again
-            </button>
-        </div>
+    <!-- GAME BOARD -->
+    <div id="game-board" class="game-board">
+        <!-- Cards will be generated dynamically -->
     </div>
 
-    <!-- JAVASCRIPT -->
-    <script src="assets/js/script.js" defer></script>
+</div>
+
+<!-- WIN MESSAGE -->
+<div id="win-message" class="win-message">
+    <div class="win-content">
+        <h2>🎉 You Win! 🎉</h2>
+        <p>You matched all the cards!</p>
+        <p>Moves: <span id="final-moves">0</span></p>
+        <p>Time: <span id="final-time">0</span></p>
+        <button id="play-again" class="play-again-btn"><i class="fas fa-play"></i> Play Again</button>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="assets/js/script.js"></script>
 </body>
 </html>
