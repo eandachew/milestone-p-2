@@ -97,11 +97,6 @@ h1 {
 }
 
 
-/* Layouts */
-.desktop-layout { grid-template-columns: repeat(6, 1fr); }
-.tablet-layout { grid-template-columns: repeat(4, 1fr); }
-.mobile-layout { grid-template-columns: repeat(3, 1fr); }
-
 .card {
   width: 100%;
   aspect-ratio: 1;
