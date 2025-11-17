@@ -1,289 +1,407 @@
-// STEP 1: Initialization and Setup
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1.1: Game State Variables ---
-    let moves = 0;
-    let timer = 0;
-    let gameStarted = false;
-    let timerInterval;
-    let firstCard = null;
-    let secondCard = null;
-    let lockBoard = false;
-    let matchedPairs = 0;
-    let totalPairs; // Determined dynamically based on screen size
+  let moves = 0, timer = 0, gameStarted = false, timerInterval;
+  let firstCard = null, secondCard = null, lockBoard = false, matchedPairs = 0, totalPairs;
 
-    // --- 1.2: DOM Element References ---
-    const gameBoard = document.getElementById('game-board');
-    const movesCount = document.getElementById('moves-count');
-    const timeElement = document.getElementById('time');
-    const restartButton = document.getElementById('restart');
-    const winMessage = document.getElementById('win-message');
-    const finalMoves = document.getElementById('final-moves');
-    const finalTime = document.getElementById('final-time');
-    const playAgainButton = document.getElementById('play-again');
+  const gameBoard = document.getElementById('game-board');
+  const movesCount = document.getElementById('moves-count');
+  const timeElement = document.getElementById('time');
+  const restartButton = document.getElementById('restart');
+  const winMessage = document.getElementById('win-message');
+  const finalMoves = document.getElementById('final-moves');
+  const finalTime = document.getElementById('final-time');
+  const playAgainButton = document.getElementById('play-again');
 
-    // --- 1.3: Card Symbols ---
-    const cardSymbols = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉', '🍒', '🍐', '🥝', '🍑', '🥥', '🍋'];
+  const cardSymbols = ['🍎','🍌','🍇','🍊','🍓','🍉','🍒','🍐','🥝','🍑','🥥','🍋'];
 
+  // Debug mode for responsive testing
+  const isInIframe = window.self !== window.top;
+  if (isInIframe) {
+    console.log('Running in iframe - responsive tester detected');
+    enableDebugMode();
+  }
 
-    // ----------------------------------------------------
-    // STEP 2: Game Flow Management (Init, Start, End, Reset)
-    // ----------------------------------------------------
-
-    /**
-     * Initializes a new game state and sets up the board.
-     */
-    function initGame() {
-        // Reset all core variables
-        gameBoard.innerHTML = '';
-        moves = 0;
-        timer = 0;
-        gameStarted = false;
-        matchedPairs = 0;
-        clearInterval(timerInterval);
-        winMessage.style.display = 'none';
-        resetBoard();
-
-        // Set the layout (size of the game) and create the cards
-        setResponsiveLayout(true); 
-        updateDisplay();
+  // Enhanced game setup logic
+  function initGame() {
+    console.log('=== INIT GAME STARTED ===');
+    console.log('Window width:', window.innerWidth);
+    console.log('Game board element:', gameBoard);
+    
+    // Clear existing game state
+    if (gameBoard) {
+      gameBoard.innerHTML = '';
+    } else {
+      console.error('Game board element not found!');
+      return;
     }
     
-    /**
-     * Handles the completion of the game and shows the win message.
-     */
-    function endGame() {
-        clearInterval(timerInterval);
-        
-        // Show win message after a short delay for final card animation
-        setTimeout(() => {
-            finalMoves.textContent = moves;
-            finalTime.textContent = timer;
-            winMessage.style.display = 'flex';
-            playAgainButton.focus();
-        }, 500);
-    }
-
-    /**
-     * Starts the game timer, updating the display every second.
-     */
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            timer++;
-            timeElement.textContent = timer;
-        }, 1000);
-    }
-
-    /**
-     * Updates the move count and time display elements.
-     */
-    function updateDisplay() {
-        movesCount.textContent = moves;
-        timeElement.textContent = timer;
-    }
-
-
-    // ----------------------------------------------------
-    // STEP 3: Card Creation and Responsive Layout
-    // ----------------------------------------------------
-
-    /**
-     * Determines the board size (number of pairs) and grid layout class
-     * based on the current window width.
-     */
-    function setResponsiveLayout(forceCardCreation = false) {
-        const width = window.innerWidth;
-        const oldTotalPairs = totalPairs;
-
-        // 3x2 grid for mobile
-        if (width <= 480) { 
-            totalPairs = 3; 
-            gameBoard.className = 'game-board mobile-layout';
-        // 4x4 grid for tablet
-        } else if (width <= 768) { 
-            totalPairs = 8;
-            gameBoard.className = 'game-board tablet-layout';
-        // 6x4 grid for desktop
-        } else { 
-            totalPairs = 12;
-            gameBoard.className = 'game-board desktop-layout';
-        }
-
-        // Only create cards if this is a restart/init OR the layout size changed
-        // We only rebuild the board if the number of pairs changes OR if explicitly forced (init)
-        if (forceCardCreation || (oldTotalPairs && oldTotalPairs !== totalPairs)) {
-            createCards();
-        }
-    }
+    moves = 0; 
+    timer = 0; 
+    gameStarted = false; 
+    matchedPairs = 0;
     
-    /**
-     * Creates and shuffles the card elements on the board.
-     */
-    function createCards() {
-        gameBoard.innerHTML = ''; 
-        let cards = [];
-        
-        // Populate the cards array with two of each required symbol
-        const pairsToCreate = Math.min(totalPairs, cardSymbols.length);
-        for (let i = 0; i < pairsToCreate; i++) {
-            cards.push(cardSymbols[i]);
-            cards.push(cardSymbols[i]);
-        }
-        
-        cards = shuffleArray(cards);
-        
-        // Generate the card DOM elements
-        cards.forEach((symbol, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.setAttribute('tabindex', '0');
-            
-            card.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-front" aria-hidden="true">?</div>
-                    <div class="card-back" aria-hidden="true">${symbol}</div>
-                </div>
-            `;
-            
-            // Attach the click handler
-            card.addEventListener('click', flipCard);
-            
-            gameBoard.appendChild(card);
-        });
-    }
+    if (movesCount) movesCount.textContent = moves;
+    if (timeElement) timeElement.textContent = timer;
     
-    /**
-     * Standard Fisher-Yates shuffle algorithm.
-     */
-    function shuffleArray(array) {
-        const newArray = [...array]; 
-        for (let i = newArray.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-        }
-        return newArray;
+    // Clear timer properly
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      console.log('Timer cleared');
     }
 
-
-    // ----------------------------------------------------
-    // STEP 4: Game Logic (Flipping and Matching)
-    // ----------------------------------------------------
-
-    /**
-     * Flips a card, manages the game state, and starts the match check.
-     */
-    function flipCard() {
-        // Guard clauses to prevent multiple clicks or clicking matched cards
-        if (lockBoard || this === firstCard || this.classList.contains('matched')) {
-            return;
-        }
-
-        // Start the timer on the very first click
-        if (!gameStarted) {
-            startTimer();
-            gameStarted = true;
-        }
-
-        this.classList.add('flipped');
-
-        if (!firstCard) {
-            // This is the first card flipped
-            firstCard = this;
-            return;
-        }
-
-        // This is the second card flipped
-        secondCard = this;
-        moves++;
-        movesCount.textContent = moves;
-        
-        checkForMatch();
+    // Enhanced layout detection with logging
+    const previousLayout = gameBoard.className;
+    if (window.innerWidth <= 480) {
+      totalPairs = 6; 
+      gameBoard.className = 'game-board mobile-layout';
+      console.log('Mobile layout applied (≤480px)');
+    } else if (window.innerWidth <= 768) {
+      totalPairs = 8; 
+      gameBoard.className = 'game-board tablet-layout';
+      console.log('Tablet layout applied (≤768px)');
+    } else {
+      totalPairs = 12; 
+      gameBoard.className = 'game-board desktop-layout';
+      console.log('Desktop layout applied (>768px)');
     }
 
-    /**
-     * Checks if the symbols on the two flipped cards are identical.
-     */
-    function checkForMatch() {
-        const firstSymbol = firstCard.querySelector('.card-back').textContent;
-        const secondSymbol = secondCard.querySelector('.card-back').textContent;
-        const isMatch = firstSymbol === secondSymbol;
-
-        if (isMatch) {
-            disableCards();
-        } else {
-            unflipCards();
-        }
-    }
-
-    /**
-     * Handles a successful match: marks cards, removes event listeners, and checks for game end.
-     */
-    function disableCards() {
-        firstCard.classList.add('matched');
-        secondCard.classList.add('matched');
-        
-        // Stop the cards from being flipped again
-        firstCard.removeEventListener('click', flipCard);
-        secondCard.removeEventListener('click', flipCard);
-        
-        matchedPairs++;
-        
-        if (matchedPairs === totalPairs) {
-            endGame();
-        } else {
-            resetBoard();
-        }
-    }
-
-    /**
-     * Handles a non-match: locks the board temporarily and flips cards back.
-     */
-    function unflipCards() {
-        lockBoard = true;
-        
-        // Wait 1 second, then flip both cards back
-        setTimeout(() => {
-            if (firstCard && secondCard) {
-                firstCard.classList.remove('flipped');
-                secondCard.classList.remove('flipped');
-            }
-            resetBoard();
-        }, 1000); 
-    }
-
-    /**
-     * Clears the current card selection and unlocks the board.
-     */
-    function resetBoard() {
-        lockBoard = false;
-        firstCard = null;
-        secondCard = null;
-    }
-
-    // --- Attach all major listeners ---
-    restartButton.addEventListener('click', initGame);
-    playAgainButton.addEventListener('click', initGame);
-
-    // --- UPDATED RESPONSIVE HANDLER ---
+    console.log('Total pairs:', totalPairs);
     
-    // Use a flag to track if we've already done the layout check on the current resize event cycle.
-    // This is often more reliable than using a standard setTimeout debounce in iframe scenarios.
-    let isResizing = false;
-    
-    const handleResize = () => {
-        // Only run logic if the board size actually needs to change (i.e., we cross a breakpoint).
-        // setResponsiveLayout handles the internal logic to prevent unnecessary card recreation.
-        setResponsiveLayout();
-        isResizing = false;
+    // Create and shuffle cards
+    let cards = [];
+    for (let i = 0; i < totalPairs; i++) {
+      cards.push(cardSymbols[i]);
+      cards.push(cardSymbols[i]);
     }
+    cards = shuffleArray(cards);
+    console.log('Shuffled cards:', cards);
 
-    window.addEventListener('resize', () => {
-        if (!isResizing) {
-            isResizing = true;
-            // Use requestAnimationFrame for smoother timing or a simple short timeout
-            setTimeout(handleResize, 100); 
-        }
+    // Create card elements
+    cards.forEach((symbol, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.setAttribute('data-index', index);
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-front">?</div>
+          <div class="card-back">${symbol}</div>
+        </div>`;
+      gameBoard.appendChild(card);
     });
 
-    // Start the game!
+    // Enhanced event binding
+    bindCardEvents();
+    
+    console.log('Cards created:', document.querySelectorAll('.card').length);
+    console.log('=== INIT GAME COMPLETED ===');
+  }
+
+  // Utility Function
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  // Enhanced event binding for robust responsive testing
+  function bindCardEvents() {
+    const cards = document.querySelectorAll('.card');
+    
+    // Remove all existing event listeners by cloning
+    cards.forEach(card => {
+      const newCard = card.cloneNode(true);
+      card.parentNode.replaceChild(newCard, card);
+    });
+
+    // Bind events to new cards
+    const newCards = document.querySelectorAll('.card');
+    newCards.forEach(card => {
+      // Mouse events
+      card.addEventListener('click', flipCard);
+      
+      // Touch events for mobile devices
+      card.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        flipCard.call(this);
+      }, { passive: false });
+      
+      // Keyboard accessibility
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          flipCard.call(this);
+        }
+      });
+      
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', 'Memory card');
+    });
+
+    console.log('Card events bound:', newCards.length, 'cards');
+  }
+
+  // Enhanced Card Interaction Logic
+  function flipCard() {
+    console.log('Card clicked:', this.getAttribute('data-index'));
+    
+    if (lockBoard || this === firstCard || this.classList.contains('matched')) {
+      console.log('Card flip prevented - lockBoard:', lockBoard, 'isFirstCard:', this === firstCard, 'isMatched:', this.classList.contains('matched'));
+      return;
+    }
+
+    if (!gameStarted) { 
+      startTimer(); 
+      gameStarted = true;
+      console.log('Game started - timer initiated');
+    }
+
+    this.classList.add('flipped');
+    console.log('Card flipped - symbol:', this.querySelector('.card-back').textContent);
+
+    if (!firstCard) {
+      firstCard = this;
+      console.log('First card selected');
+      return;
+    }
+
+    secondCard = this;
+    moves++;
+    if (movesCount) movesCount.textContent = moves;
+    console.log('Second card selected - move count:', moves);
+    
+    checkForMatch();
+  }
+
+  function checkForMatch() {
+    const firstSymbol = firstCard.querySelector('.card-back').textContent;
+    const secondSymbol = secondCard.querySelector('.card-back').textContent;
+    const isMatch = firstSymbol === secondSymbol;
+    
+    console.log('Match check:', firstSymbol, 'vs', secondSymbol, '- Match:', isMatch);
+
+    if (isMatch) {
+      disableCards();
+      matchedPairs++;
+      console.log('Match found! Total matches:', matchedPairs);
+      if (matchedPairs === totalPairs) {
+        endGame();
+      }
+    } else {
+      unflipCards();
+    }
+  }
+
+  function disableCards() {
+    firstCard.classList.add('matched');
+    secondCard.classList.add('matched');
+    firstCard.removeEventListener('click', flipCard);
+    secondCard.removeEventListener('click', flipCard);
+    
+    // Also remove touch events
+    firstCard.removeEventListener('touchstart', flipCard);
+    secondCard.removeEventListener('touchstart', flipCard);
+    
+    console.log('Cards disabled and marked as matched');
+    resetBoard();
+  }
+
+  function unflipCards() {
+    lockBoard = true;
+    console.log('Board locked for unflipping');
+    
+    setTimeout(() => {
+      firstCard.classList.remove('flipped');
+      secondCard.classList.remove('flipped');
+      console.log('Cards unflipped');
+      resetBoard();
+    }, 1000);
+  }
+
+  function resetBoard() {
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+    console.log('Board reset');
+  }
+
+  // Enhanced Timer Logic
+  function startTimer() {
+    console.log('Timer started');
+    timerInterval = setInterval(() => {
+      timer++;
+      if (timeElement) timeElement.textContent = timer;
+      
+      // Log every 10 seconds for debugging
+      if (timer % 10 === 0) {
+        console.log('Timer running:', timer, 'seconds');
+      }
+    }, 1000);
+  }
+
+  // Enhanced Game end logic
+  function endGame() {
+    console.log('Game completed! Moves:', moves, 'Time:', timer);
+    
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      console.log('Timer stopped');
+    }
+    
+    setTimeout(() => {
+      if (finalMoves) finalMoves.textContent = moves;
+      if (finalTime) finalTime.textContent = timer;
+      if (winMessage) {
+        winMessage.style.display = 'flex';
+        console.log('Win message displayed');
+      }
+    }, 500);
+  }
+
+  // Enhanced resize handling with debounce
+  let resizeTimeout;
+  function handleResize() {
+    const previousLayout = gameBoard.className;
+    let newLayout;
+    
+    if (window.innerWidth <= 480) {
+      newLayout = 'game-board mobile-layout';
+    } else if (window.innerWidth <= 768) {
+      newLayout = 'game-board tablet-layout';
+    } else {
+      newLayout = 'game-board desktop-layout';
+    }
+    
+    // Only reinitialize if layout actually changed
+    if (previousLayout !== newLayout) {
+      console.log('Layout change detected:', previousLayout, '->', newLayout);
+      console.log('Window width:', window.innerWidth);
+      initGame();
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(handleResize, 250);
+  });
+
+  // Fallback resize check for problematic testers
+  let lastWidth = window.innerWidth;
+  setInterval(() => {
+    const currentWidth = window.innerWidth;
+    if (Math.abs(currentWidth - lastWidth) > 50) { // Significant width change
+      console.log('Significant width change detected:', lastWidth, '->', currentWidth);
+      lastWidth = currentWidth;
+      handleResize();
+    }
+  }, 500);
+
+  // Event listeners with error handling
+  if (restartButton) {
+    restartButton.addEventListener('click', () => {
+      console.log('Restart button clicked');
+      initGame();
+    });
+    
+    // Add touch support for restart button
+    restartButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      initGame();
+    });
+  } else {
+    console.error('Restart button not found');
+  }
+
+  if (playAgainButton) {
+    playAgainButton.addEventListener('click', () => {
+      console.log('Play again button clicked');
+      if (winMessage) winMessage.style.display = 'none';
+      initGame();
+    });
+    
+    playAgainButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (winMessage) winMessage.style.display = 'none';
+      initGame();
+    });
+  } else {
+    console.error('Play again button not found');
+  }
+
+  // Debug mode for responsive testing
+  function enableDebugMode() {
+    console.log('Enhancing debug mode for responsive testing');
+    
+    // Add debug styles
+    const debugStyle = document.createElement('style');
+    debugStyle.textContent = `
+      .debug-outline * { outline: 1px solid red; }
+      .layout-info {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 10px;
+        z-index: 10000;
+        font-family: monospace;
+        font-size: 12px;
+        border-radius: 5px;
+        pointer-events: none;
+      }
+      .card:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s;
+      }
+    `;
+    document.head.appendChild(debugStyle);
+    
+    // Show current layout info
+    const layoutInfo = document.createElement('div');
+    layoutInfo.className = 'layout-info';
+    document.body.appendChild(layoutInfo);
+    
+    function updateLayoutInfo() {
+      let layout, pairs;
+      if (window.innerWidth <= 480) {
+        layout = 'Mobile (≤480px)';
+        pairs = 6;
+      } else if (window.innerWidth <= 768) {
+        layout = 'Tablet (≤768px)';
+        pairs = 8;
+      } else {
+        layout = 'Desktop (>768px)';
+        pairs = 12;
+      }
+      
+      layoutInfo.textContent = `Width: ${window.innerWidth}px\nLayout: ${layout}\nPairs: ${pairs}\nIn Iframe: ${isInIframe}`;
+    }
+    
+    window.addEventListener('resize', updateLayoutInfo);
+    updateLayoutInfo();
+    
+    // Log initial state
+    console.log('Debug mode enabled - running in iframe:', isInIframe);
+    console.log('Initial window size:', window.innerWidth, 'x', window.innerHeight);
+  }
+
+  // Force initial layout check
+  setTimeout(() => {
+    console.log('Initial layout setup');
     initGame();
+  }, 100);
+
+  // Export for testing (if needed)
+  window.memoryGame = {
+    initGame,
+    shuffleArray,
+    flipCard,
+    checkForMatch,
+    startTimer,
+    endGame,
+    getState: () => ({ moves, timer, gameStarted, matchedPairs, totalPairs })
+  };
 });
