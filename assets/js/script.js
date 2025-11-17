@@ -1,136 +1,221 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let moves = 0, timer = 0, gameStarted = false, timerInterval;
-  let firstCard = null, secondCard = null, lockBoard = false, matchedPairs = 0, totalPairs;
 
-  const gameBoard = document.getElementById('game-board');
-  const movesCount = document.getElementById('moves-count');
-  const timeElement = document.getElementById('time');
-  const restartButton = document.getElementById('restart');
-  const winMessage = document.getElementById('win-message');
-  const finalMoves = document.getElementById('final-moves');
-  const finalTime = document.getElementById('final-time');
-  const playAgainButton = document.getElementById('play-again');
+    // --------------------
+    // GAME STATE
+    // --------------------
+    let moves = 0;
+    let timer = 0;
+    let timerInterval;
+    let gameStarted = false;
 
-  const cardSymbols = ['🍎','🍌','🍇','🍊','🍓','🍉','🍒','🍐','🥝','🍑','🥥','🍋'];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let matchedPairs = 0;
+    let totalPairs = 12; // default
 
-  // Game setup logic 
+    // --------------------
+    // DOM ELEMENTS
+    // --------------------
+    const gameBoard = document.getElementById('game-board');
+    const movesCount = document.getElementById('moves-count');
+    const timeElement = document.getElementById('time');
+    const restartButton = document.getElementById('restart');
+
+    const winMessage = document.getElementById('win-message');
+    const finalMoves = document.getElementById('final-moves');
+    const finalTime = document.getElementById('final-time');
+    const playAgainButton = document.getElementById('play-again');
+
+    // Card symbols (12 possible pairs)
+    const cardSymbols = [
+        '🍎','🍌','🍇','🍊','🍓','🍉',
+        '🍒','🍐','🥝','🍑','🥥','🍋'
+    ];
+
+    // --------------------
+    // INITIALIZE GAME
+    // --------------------
     function initGame() {
-    gameBoard.innerHTML = '';
-    moves = 0; timer = 0; gameStarted = false; matchedPairs = 0;
-    movesCount.textContent = moves; timeElement.textContent = timer;
-    clearInterval(timerInterval);
+        // reset game state
+        moves = 0;
+        timer = 0;
+        gameStarted = false;
+        matchedPairs = 0;
 
-    if (window.innerWidth <= 480) {
-      totalPairs = 6; gameBoard.className = 'game-board mobile-layout';
-    } else if (window.innerWidth <= 768) {
-      totalPairs = 8; gameBoard.className = 'game-board tablet-layout';
-    } else {
-      totalPairs = 12; gameBoard.className = 'game-board desktop-layout';
+        movesCount.textContent = moves;
+        timeElement.textContent = timer;
+
+        clearInterval(timerInterval);
+        gameBoard.innerHTML = '';
+        winMessage.style.display = "none";
+
+        // Determine number of pairs based on screen size
+        if (window.innerWidth <= 480) {
+            totalPairs = 6;
+            gameBoard.className = "game-board mobile-layout";
+        }
+        else if (window.innerWidth <= 768) {
+            totalPairs = 8;
+            gameBoard.className = "game-board tablet-layout";
+        }
+        else {
+            totalPairs = 12;
+            gameBoard.className = "game-board desktop-layout";
+        }
+
+        createCards();
     }
 
-    let cards = [];
-    for (let i = 0; i < totalPairs; i++) {
-      cards.push(cardSymbols[i]);
-      cards.push(cardSymbols[i]);
-    }
-    cards = shuffleArray(cards);
+    // --------------------
+    // CREATE CARDS
+    // --------------------
+    function createCards() {
+        let cards = [];
 
-    cards.forEach(symbol => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="card-inner">
-          <div class="card-front">?</div>
-          <div class="card-back">${symbol}</div>
-        </div>`;
-      card.addEventListener('click', flipCard);
-      gameBoard.appendChild(card);
-    });
-  }
-// Utility Function
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+        // Select N pairs based on screen size
+        for (let i = 0; i < totalPairs; i++) {
+            cards.push(cardSymbols[i]);
+            cards.push(cardSymbols[i]);
+        }
+
+        // Shuffle
+        cards = shuffle(cards);
+
+        // Build the card HTML
+        cards.forEach(symbol => {
+            const card = document.createElement('div');
+            card.className = "card";
+            card.setAttribute("tabindex", "0");
+
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">?</div>
+                    <div class="card-back">${symbol}</div>
+                </div>
+            `;
+
+            card.addEventListener('click', flipCard);
+            gameBoard.appendChild(card);
+        });
     }
-    return array;
-  }
-  // Card Interaction Logic
+
+    // --------------------
+    // SHUFFLE FUNCTION
+    // --------------------
+    function shuffle(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // --------------------
+    // CARD FLIP LOGIC
+    // --------------------
     function flipCard() {
-    if (lockBoard || this === firstCard || this.classList.contains('matched')) return;
+        if (lockBoard || this === firstCard) return;
 
-    if (!gameStarted) { startTimer(); gameStarted = true; }
+        if (!gameStarted) {
+            startTimer();
+            gameStarted = true;
+        }
 
-    this.classList.add('flipped');
+        this.classList.add("flipped");
 
-    if (!firstCard) {
-      firstCard = this;
-      return;
+        if (!firstCard) {
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        moves++;
+        movesCount.textContent = moves;
+
+        checkForMatch();
     }
 
-    secondCard = this;
-    moves++;
-    movesCount.textContent = moves;
-    checkForMatch();
-  }
+    function checkForMatch() {
+        const a = firstCard.querySelector('.card-back').textContent;
+        const b = secondCard.querySelector('.card-back').textContent;
 
-  function checkForMatch() {
-    const isMatch = firstCard.querySelector('.card-back').textContent ===
-                    secondCard.querySelector('.card-back').textContent;
-
-    if (isMatch) {
-      disableCards();
-      matchedPairs++;
-      if (matchedPairs === totalPairs) endGame();
-    } else {
-      unflipCards();
+        if (a === b) {
+            disableCards();
+        } else {
+            unflipCards();
+        }
     }
-  }
 
-  function disableCards() {
-    firstCard.classList.add('matched');
-    secondCard.classList.add('matched');
-    firstCard.removeEventListener('click', flipCard);
-    secondCard.removeEventListener('click', flipCard);
-    resetBoard();
-  }
+    function disableCards() {
+        firstCard.classList.add("matched");
+        secondCard.classList.add("matched");
 
-  function unflipCards() {
-    lockBoard = true;
-    setTimeout(() => {
-      firstCard.classList.remove('flipped');
-      secondCard.classList.remove('flipped');
-      resetBoard();
-    }, 1000);
-  }
+        matchedPairs++;
 
-  function resetBoard() {
-    [firstCard, secondCard] = [null, null];
-    lockBoard = false;
-  }
-// Timer Logic
-  function startTimer() {
-    timerInterval = setInterval(() => {
-      timer++;
-      timeElement.textContent = timer;
-    }, 1000);
-  }
-// Game end logic 
-  function endGame() {
-    clearInterval(timerInterval);
-    setTimeout(() => {
-      finalMoves.textContent = moves;
-      finalTime.textContent = timer;
-      winMessage.style.display = 'flex';
-    }, 1000);
-  }
-  // Event listeners to restart.
+        resetFlip();
+
+        if (matchedPairs === totalPairs) {
+            endGame();
+        }
+    }
+
+    function unflipCards() {
+        lockBoard = true;
+
+        setTimeout(() => {
+            firstCard.classList.remove("flipped");
+            secondCard.classList.remove("flipped");
+
+            resetFlip();
+        }, 1000);
+    }
+
+    function resetFlip() {
+        firstCard = null;
+        secondCard = null;
+        lockBoard = false;
+    }
+
+    // --------------------
+    // TIMER
+    // --------------------
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timer++;
+            timeElement.textContent = timer;
+        }, 1000);
+    }
+
+    // --------------------
+    // END GAME
+    // --------------------
+    function endGame() {
+        clearInterval(timerInterval);
+
+        finalMoves.textContent = moves;
+        finalTime.textContent = timer;
+
+        winMessage.style.display = "flex";
+    }
+
+    // --------------------
+    // BUTTON EVENTS
+    // --------------------
     restartButton.addEventListener('click', initGame);
-  playAgainButton.addEventListener('click', () => {
-    winMessage.style.display = 'none';
-    initGame();
-  });
 
-  initGame();
-  window.addEventListener('resize', initGame);
+    playAgainButton.addEventListener('click', () => {
+        winMessage.style.display = 'none';
+        initGame();
+    });
+
+    // Rebuild game when window resized
+    window.addEventListener('resize', () => {
+        initGame();
+    });
+
+    // Start game first time
+    initGame();
+
 });
