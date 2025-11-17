@@ -1,308 +1,132 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
+/* GENERAL PAGE STYLES */
 body {
-  background: linear-gradient(135deg, #2c3e50, #1a2530);
-  color: #ecf0f1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background: #0f1d2e;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+/* Header box */
+.header {
+    margin-top: 20px;
+    width: 90%;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.07);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
 }
 
-header {
-  text-align: center;
-  margin: 20px 0;
-  padding: 15px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.2);
-  width: 100%;
+/* Stats & restart section */
+.controls {
+    margin-top: 20px;
+    width: 90%;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.07);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
 }
 
-h1 {
-  font-size: 2.8rem;
-  margin-bottom: 10px;
-  color: #3498db;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+/* Restart button */
+button {
+    margin-top: 10px;
+    padding: 12px 25px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: #e74c3c;
+    border-radius: 6px;
+    font-size: 16px;
+}
+button:hover {
+    background: #c0392b;
 }
 
-.instructions {
-  font-size: 1.2rem;
-  max-width: 600px;
-  margin: 0 auto;
-  color: #bdc3c7;
-}
+/* ============================
+   FIXED GAME BOARD STYLES
+   ============================ */
 
-.game-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 15px 25px;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.moves, .timer {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #3498db;
-  display: flex;
-  align-items: center;
-}
-
-.moves i, .timer i {
-  margin-right: 8px;
-  font-size: 1.4rem;
-}
-
-.restart-btn {
-  padding: 12px 24px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.restart-btn:hover {
-  background: #c0392b;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* GAME BOARD - UPDATED WITH SPECIFICITY FIX */
 .game-board {
-  display: grid;
-  grid-gap: 12px;
-  margin: 0 auto 30px;
-  justify-content: center;
-  max-width: 100%;
-  /* REMOVED grid-template-columns from base class */
+    width: 90%;
+    max-width: 900px;
+    margin-top: 25px;
+    display: grid;
+    gap: 12px;
+    justify-content: center;
 }
 
-/* Layouts - INCREASED SPECIFICITY */
-.game-board.desktop-layout { 
-  grid-template-columns: repeat(6, 1fr);
-  max-width: 900px;
+/* Mobile layout (6 pairs = 12 cards) */
+.mobile-layout {
+    grid-template-columns: repeat(3, 1fr);
 }
 
-.game-board.tablet-layout { 
-  grid-template-columns: repeat(4, 1fr);
-  max-width: 600px;
+/* Tablet layout (8 pairs = 16 cards) */
+.tablet-layout {
+    grid-template-columns: repeat(4, 1fr);
 }
 
-.game-board.mobile-layout { 
-  grid-template-columns: repeat(3, 1fr);
-  max-width: 400px;
+/* Desktop layout (12 pairs = 24 cards) */
+.desktop-layout {
+    grid-template-columns: repeat(6, 1fr);
 }
+
+/* ============================
+   CARD DESIGN
+   ============================ */
 
 .card {
-  width: 100%;
-  aspect-ratio: 1;
-  perspective: 1000px;
-  cursor: pointer;
+    width: 100%;
+    aspect-ratio: 1/1.3; /* responsive height */
+    position: relative;
+    cursor: pointer;
+    perspective: 1000px;
 }
 
 .card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
 }
 
-.card.flipped .card-inner { 
-  transform: rotateY(180deg); 
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
 }
 
-.card.matched .card-inner {
-  transform: rotateY(180deg);
-  box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
-}
-
-.card-front, .card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 12px;
-}
-
-.card-front {
-  background: linear-gradient(135deg, #3498db, #2c3e50);
-  color: white;
-  font-size: 2rem;
-  font-weight: bold;
-}
-
+/* Front & back of card */
+.card-front,
 .card-back {
-  background-color: #fff;
-  color: #2c3e50;
-  transform: rotateY(180deg);
-  font-size: 2.2rem;
-  font-weight: bold;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.card.matched .card-back {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: white;
+/* Front */
+.card-front {
+    background: #1e3a5f;
 }
 
+/* Back */
+.card-back {
+    background: #4a90e2;
+    transform: rotateY(180deg);
+}
+
+/* Footer */
 footer {
-  text-align: center;
-  color: #bdc3c7;
-  margin-top: auto;
-  padding: 20px 0;
-  font-size: 1rem;
-  width: 100%;
-}
-
-/* Win message */
-.win-message {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  color: white;
-  text-align: center;
-}
-
-.win-content {
-  background: linear-gradient(135deg, #3498db, #2c3e50);
-  padding: 40px;
-  border-radius: 15px;
-  max-width: 90%;
-  width: 500px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.win-content h2 { 
-  font-size: 2.5rem; 
-  color: #2ecc71; 
-  margin-bottom: 20px; 
-}
-
-.win-content p { 
-  font-size: 1.3rem; 
-  margin-bottom: 25px; 
-}
-
-.play-again-btn {
-  padding: 12px 24px;
-  background: #2ecc71;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin: 0 auto;
-}
-
-.play-again-btn:hover {
-  background: #27ae60;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-.play-again-btn i {
-  margin-right: 8px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  h1 { font-size: 2.4rem; }
-  .instructions { font-size: 1.1rem; }
-  .card-front { font-size: 1.8rem; }
-  .card-back { font-size: 2rem; }
-  
-  .game-board.desktop-layout { 
-    grid-template-columns: repeat(6, 1fr);
-    max-width: 800px;
-  }
-}
-
-@media (max-width: 768px) {
-  h1 { font-size: 2rem; }
-  .instructions { font-size: 1rem; }
-  .game-info { flex-direction: column; gap: 10px; }
-  .card-front { font-size: 1.6rem; }
-  .card-back { font-size: 1.8rem; }
-  
-  .game-board.tablet-layout { 
-    grid-template-columns: repeat(4, 1fr);
-    max-width: 500px;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 { font-size: 1.8rem; }
-  .instructions { font-size: 0.9rem; }
-  .card-front { font-size: 1.5rem; }
-  .card-back { font-size: 1.7rem; }
-  .game-info { padding: 10px 15px; }
-  
-  .game-board.mobile-layout { 
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 350px;
-    grid-gap: 8px;
-  }
-  
-  .win-content {
-    padding: 30px 20px;
-    margin: 20px;
-  }
-  
-  .win-content h2 { font-size: 2rem; }
-  .win-content p { font-size: 1.1rem; }
-}
-
-/* Additional small screen support */
-@media (max-width: 360px) {
-  body { padding: 10px; }
-  
-  .game-board.mobile-layout { 
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 300px;
-    grid-gap: 6px;
-  }
-  
-  .card-front { font-size: 1.3rem; }
-  .card-back { font-size: 1.5rem; }
+    margin-top: 50px;
+    text-align: center;
+    opacity: 0.7;
 }
